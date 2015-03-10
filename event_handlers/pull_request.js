@@ -1,8 +1,6 @@
 var Github = require('github');
 var q      = require('q');
-var githubToken = process.env.GITHUB_2FA_TOKEN;
-var github_client_id = process.env.GITHUB_TRELLO_CLIENT_ID;
-var github_client_secret = process.env.GITHUB_TRELLO_CLIENT_SECRET;
+var githubToken = process.env.GITHUB_TOKEN;
 
 var t = require('../config/initializers/trello');
 var prListId = t.PR_LIST_ID;
