@@ -22,11 +22,19 @@ router.all('/', function(req, res, next) {
   }
 
   var events = ['push', 'pull_request'];
+  var pull_request_actions = [ 'opened', 'closed' ];
 
-  if (events.indexOf(eventType) !== -1) {
-    hookHandler = require('../event_handlers/' + eventType)(data);
-  } else {
-    hookHandler = q.resolve();
+  switch(eventType) {
+    case "push":
+      hookHandler = require('../event_handlers/' + eventType)(data);
+      break;
+      
+    case "pull_request":
+      hookHandler = require('../event_handlers/pull_request/' + data.action);
+      break;
+      
+    default:
+      hookHandler = q.resolve();
   }
 
   hookHandler.then(function(data) {

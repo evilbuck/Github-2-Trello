@@ -16,5 +16,8 @@
     "node-trello": "^1.0.1",
     "q": "^1.2.0",
     "serve-favicon": "~2.2.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.6.3"
   }
 }

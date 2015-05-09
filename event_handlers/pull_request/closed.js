@@ -3,7 +3,7 @@ var q      = require('q');
 var githubToken = process.env.GITHUB_TOKEN;
 
 var t = require('../config/initializers/trello');
-var prListId = t.PR_LIST_ID;
+var mergeListId = t.MERGE_LIST_ID;
 
 var gh = new Github({
   version: '3.0.0',
@@ -11,6 +11,7 @@ var gh = new Github({
 });
 
 function parseCommit(commitMessage) {
+  var trelloCardId;
   var trelloIdRegex = /\[fixes #([\w\-]+)\]/im;
 
   if (trelloIdRegex.test(commitMessage)) {
@@ -29,7 +30,7 @@ function authenticateGithub() {
   });
 }
 
-function PullRequest(data) {
+function Closed(data) {
   var trelloCardId;
   var sha;
 
@@ -40,9 +41,9 @@ function PullRequest(data) {
     repo: data.repository.name,
     number: data.pull_request.number
   };
-  
+
   authenticateGithub();
-  // get commits and commit messages
+
   return q.nfcall(gh.pullRequests.getCommits.bind(gh.pullRequests), params).then(function(ghRes) {
     // TODO: find multiple instances of the [Fixes #<id>] syntax
     var trelloCards = ghRes.reduce(function(memo, prCommit) {
@@ -59,11 +60,11 @@ function PullRequest(data) {
   .then(function(commits) {
     // move all trello cards to Pull Requested list
     var moveCards = commits.map(function(trelloCardId) {
-      return q.nfcall(t.put.bind(t), '/1/cards/' + trelloCardId + '/idList', { value: prListId });
+      return q.nfcall(t.put.bind(t), '/1/cards/' + trelloCardId + '/idList', { value: mergeListId });
     });
 
     return q.all(moveCards);
   });
 }
 
-module.exports = PullRequest;
+module.exports = Closed;
