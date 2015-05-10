@@ -12,12 +12,13 @@ var gh = new Github({
 
 function parseCommit(commitMessage) {
   var trelloCardId;
-  var trelloIdRegex = /\[fixes #([\w\-]+)\]/im;
+  var trelloIdRegex = /\[fixes #(.+?)\]/im;
 
+  console.log('\n\ncommit message', commitMessage, '\n\n');
   if (trelloIdRegex.test(commitMessage)) {
     // TODO: handle multiple cards in one commit
     trelloCardId = commitMessage.match(trelloIdRegex)[1];
-    return trelloCardId;
+    return encodeURIComponent(trelloCardId);
   }
 
   return null;
@@ -34,7 +35,6 @@ function PullRequest(data) {
   var trelloCardId;
   var sha;
 
-  debugger
   sha = data.pull_request.base.sha;
 
   var params = {
@@ -49,6 +49,7 @@ function PullRequest(data) {
     // TODO: find multiple instances of the [Fixes #<id>] syntax
     var trelloCards = ghRes.reduce(function(memo, prCommit) {
       var cardId = parseCommit(prCommit.commit.message);
+      console.log('cardId:', cardId);
       if (cardId !== null) {
         memo.push(cardId);
       }
@@ -59,10 +60,22 @@ function PullRequest(data) {
     return trelloCards;
   }, function(err) { console.error("things fucked up:", err, params); })
   .then(function(commits) {
+    var comments = data.pull_request.html_url;
     // move all trello cards to Pull Requested list
     var moveCards = commits.map(function(trelloCardId) {
       return q.nfcall(t.put.bind(t), '/1/cards/' + trelloCardId + '/idList', { value: prListId });
     });
+
+    moveCards = moveCards.concat(commits.map(function(trelloCardId) {
+      q.nfcall(t.post.bind(t), '/1/cards/' + trelloCardId + '/actions/comments',
+        { text: comments })
+      .catch(function(err) {
+        if (process.env.DEBUG) {
+          console.log('Trello error', err, err.message, trelloCardId);
+        }
+        return q.reject(err);
+      });
+    }));
 
     return q.all(moveCards);
   });
