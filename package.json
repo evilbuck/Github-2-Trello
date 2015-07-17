@@ -20,7 +20,10 @@
   "devDependencies": {
     "chai": "^2.3.0",
     "jshint": "^2.6.3",
+    "lodash": "^3.8.0",
     "mocha": "^2.2.4",
+    "mockery": "^1.4.0",
+    "sinon": "^1.14.1",
     "supertest": "^0.15.0"
   }
 }
