@@ -18,6 +18,9 @@
     "serve-favicon": "~2.2.0"
   },
   "devDependencies": {
-    "jshint": "^2.6.3"
+    "chai": "^2.3.0",
+    "jshint": "^2.6.3",
+    "mocha": "^2.2.4",
+    "supertest": "^0.15.0"
   }
 }
