@@ -34,7 +34,6 @@ function PullRequest(data) {
   var trelloCardId;
   var sha;
 
-  debugger
   sha = data.pull_request.base.sha;
 
   var params = {
